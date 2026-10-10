@@ -1,50 +1,54 @@
 # Hotspot Tile
 
-Pixel için Hızlı Ayarlar karosu + panel: hotspot'u aç/kapat, ağ ayarlarını değiştir, QR ile paylaş, bağlanan cihazları yönet.
-Android 17 Pixel'de geliştirildi (Android 13+ hedeflenir). Başlatıcı simgesi yoktur; yalnızca karo ve panel. Paket: `com.mbaha.hotspottile`.
+[Türkçe](README.tr.md)
 
-**Özellikler:** karo (kısa dokunuş aç/kapat, uzun basış panel) · QR ile paylaşım (parmak izi korumalı) · ad, şifre, güvenlik (WPA2/WPA3),
-bant ve kanal, cihaz sınırı, Wi-Fi 6/7, MAC gizliliği · bağlı cihazları düşür/engelle, isim ver, güvenilir yap · yeni cihaz bildirimi ·
-"yalnızca güvenilen cihazlar" · boştayken / zamanlayıcıyla / her gün belirli saatte kapat · TR/EN çeviri.
+A Quick Settings tile and settings panel for the Wi-Fi hotspot on Pixel phones. I built it on a Pixel 9 Pro XL running Android 17 and it targets Android 13 and up. There is no launcher icon. You use the tile, and a long press on it opens the panel. The package name is `com.mbaha.hotspottile`.
 
-## Hazır APK ile kurulum (derlemeden)
+A short tap on the tile turns the hotspot on or off. The panel lets you change the network name, password, security (WPA2 or WPA3), band, channel, device limit, Wi-Fi 6 and 7, and MAC privacy. It shows a QR code you can scan to join (behind a fingerprint check), lists the connected devices, and lets you name, trust, disconnect or block each one. It can notify you when a new device joins, and it can block anything you haven't approved. The hotspot can switch itself off when idle, after a timer, or at a set time every day. The interface is in English and Turkish.
 
-[Releases](../../releases) sayfasından `hotspottile-<sürüm>.apk` dosyasını indirin. Uygulama hotspot'u yönetebilmek için telefonda
-`adb` yetkisine ihtiyaç duyar; bu yüzden **bir kez** bilgisayara ihtiyacınız var.
+## Install the ready-made APK
 
-1. Telefonda **Geliştirici seçenekleri → USB hata ayıklama**'yı açın, USB ile bilgisayara bağlayın ve bilgisayara izin verin.
-2. Bilgisayarda (`adb` yüklü olmalı):
+Download `hotspottile-<version>.apk` from the [Releases](../../releases) page. The app manages the hotspot through a local adb connection, so you need a computer once to set that up.
+
+1. On the phone, turn on Developer options and USB debugging, connect it by USB, and accept the computer's prompt.
+2. On the computer, with `adb` installed:
    ```bash
    adb install -g hotspottile-0.1.0.apk
    adb shell pm grant com.mbaha.hotspottile android.permission.WRITE_SECURE_SETTINGS
    adb tcpip 5555
    adb shell am start -n com.mbaha.hotspottile/.PanelActivity
    ```
-3. Telefonda çıkan pencereler:
-   - **"USB hata ayıklamaya izin ver?"** (`hotspot@tile`) → **"Her zaman izin ver"** işaretleyip onaylayın.
-   - **"Hızlı Ayarlar'a karo ekle"** → karoyu ekleyin (çıkmazsa Hızlı Ayarlar → düzenle → Hotspot).
-   - Bildirim izni → yeni cihaz uyarıları için izin verin.
-4. Hazır. **Kısa dokunuş** hotspot'u açar/kapatır, **uzun basış** paneli açar. Başlatıcıda simge yoktur; panele karo üzerinden ulaşırsınız.
+3. Answer the prompts on the phone:
+   - "Allow USB debugging?" for `hotspot@tile`: tick "Always allow" and confirm.
+   - "Add tile to Quick Settings": add the tile. If the prompt doesn't appear, open Quick Settings, edit the tiles and add Hotspot.
+   - Notification permission: allow it if you want new-device alerts.
 
-### Sonrasında yapmanız gerekenler
-- **Yeniden başlatma:** `adb tcpip 5555` komutunu **bir daha yazmanız gerekmez**. Telefon herhangi bir Wi-Fi ağına bağlanınca uygulama
-  Kablosuz hata ayıklamayı geçici açıp 5555'i kendisi yeniden açar (Panel → Gelişmiş'ten kapatılabilir).
-  - Yeni bir Wi-Fi ağında Android bir kez "Bu ağda kablosuz hata ayıklamaya izin ver?" sorar → **"Bu ağda her zaman izin ver"**.
-  - Telefon hiç Wi-Fi'ye bağlanmadıysa (yalnız mobil veri) otomatik açma çalışmaz; o durumda bilgisayardan `adb tcpip 5555` yeterli.
-- **Güncelleme:** yeni APK'yı `adb install -r` ile üstüne kurun (aynı imza anahtarıyla imzalı olduğu sürece ayarlar ve yetkiler korunur).
-- **Kaldırma:** `adb uninstall com.mbaha.hotspottile`. Telefonda `/data/local/tmp/hotspottile.*` dosyaları ve yardımcı süreç yeniden başlatmada kendiliğinden gider.
+That's all. A short tap on the tile switches the hotspot, and a long press opens the panel. The app has no launcher icon, so the tile is the only way into the panel.
 
-## Kendiniz derleyin
-Gereksinimler (Mac): Android SDK (`~/Library/Android/sdk`) içinde **build-tools 36.1.0** ve **platforms/android-36**, JDK 11+, `adb`.
+### What to do afterwards
+
+You don't need to run `adb tcpip 5555` again after a reboot. When the phone joins any Wi-Fi network and port 5555 is closed, the app turns on wireless debugging for a moment, reopens the port itself, and turns wireless debugging off again. You can disable this under Advanced in the panel.
+
+- The first time you use a new Wi-Fi network, Android asks "Allow wireless debugging on this network?". Choose "Always allow on this network" and it won't ask again for that network.
+- If the phone has only used mobile data since the reboot, there is no Wi-Fi to trigger this. Run `adb tcpip 5555` from the computer in that case.
+- To update, install the new APK over the old one with `adb install -r`. Settings and permissions stay as long as the APK is signed with the same key.
+- To remove the app, run `adb uninstall com.mbaha.hotspottile`.
+
+## Build it yourself
+
+You need a Mac with the Android SDK in `~/Library/Android/sdk` (build-tools 36.1.0 and platforms/android-36), JDK 11 or newer, and `adb`.
+
 ```bash
-./build.sh                  # -> build/app.apk   (VERSION_NAME=0.1.1 VERSION_CODE=2 ./build.sh ile sürüm verilebilir)
-./build.sh install          # derle + kur + WRITE_SECURE_SETTINGS izni (telefon USB'de, hata ayıklama açık)
-adb tcpip 5555              # bir kez; sonrası otomatik (yukarıya bakın)
+./build.sh            # builds build/app.apk
+./build.sh install    # builds, installs, and grants WRITE_SECURE_SETTINGS (phone connected by USB)
+adb tcpip 5555        # once; later reboots are handled automatically
 ```
-Gradle yok. İmza anahtarı `keystore/local.jks` yoksa betik üretir (repoya girmez). `DEBUG_MODE=1 ./build.sh` debuggable derler.
 
-## Notlar
-- Eski paketten (`dev.hotspot.tile`) geliyorsanız ayrı bir uygulamadır: `adb uninstall dev.hotspot.tile`, yeni uygulama kendi ADB anahtarını üretir.
-- 6 GHz hotspot ülke kısıtına bağlıdır; sistem o ülkede kanal bildirmiyorsa (ör. TR) düğme gizlenir, istek sessizce 5 GHz'e düşer.
-- Yeni cihaz bildirimi ve "yalnızca güvenilen cihazlar" için telefonda küçük bir yardımcı süreç çalışır; kalıcı bildirim yoktur.
-- Güvenlik: 5555 portu açıkken Wi-Fi'deki herkese dinler, ama bağlanmak için telefonda onaylanmış ADB anahtarı gerekir.
+There is no Gradle. Set `VERSION_NAME` and `VERSION_CODE` to version a build, for example `VERSION_NAME=0.1.1 VERSION_CODE=2 ./build.sh`. If `keystore/local.jks` doesn't exist, the script creates one. It is not committed, so keep your own copy if you plan to publish updates. `DEBUG_MODE=1 ./build.sh` produces a debuggable build for `run-as`.
+
+## Notes
+
+- The app is a separate install from the older `dev.hotspot.tile` package and generates its own adb key. Remove the old one with `adb uninstall dev.hotspot.tile`.
+- Whether 6 GHz works depends on the country. When the system reports no 6 GHz channels (it does not in Turkey), the 6 GHz option is hidden, because a request for it would silently fall back to 5 GHz.
+- New-device alerts and "trusted devices only" rely on a small helper process that runs on the phone with shell permissions. It starts when needed and shows no notification.
+- While port 5555 is open, any device on the same Wi-Fi can reach it, but it still needs an adb key you approved on the phone before it can connect.

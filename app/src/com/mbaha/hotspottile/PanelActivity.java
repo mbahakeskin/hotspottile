@@ -156,15 +156,18 @@ public class PanelActivity extends Activity {
         // Bildirim/otomasyon ozelligi aciksa ve telefondaki olay sureci calismiyorsa baslat; yetenekleri onbellekten al.
         io.execute(() -> {
             Daemon.ensure(this, s);
-            loadCaps();
+            loadCaps(s.optString("country", null));
         });
     }
 
     /** Ulke kisitlarini iceren gercek kanal listelerini bir kez okur ve 24 saat onbellekte tutar. */
-    private void loadCaps() {
+    private void loadCaps(String countryNow) {
         Store st = Store.get(this);
         try {
-            if (st.capsJson() == null || System.currentTimeMillis() - st.capsAt() > 24 * 3600_000L) {
+            String cachedCountry = st.capsJson() == null ? null : new JSONObject(st.capsJson()).optString("country", null);
+            // Ulke kodu degistiyse (orn. yolculuk, elle degisiklik) kanal listeleri de degisir: onbellegi atla.
+            boolean countryChanged = countryNow != null && cachedCountry != null && !countryNow.equalsIgnoreCase(cachedCountry);
+            if (st.capsJson() == null || countryChanged || System.currentTimeMillis() - st.capsAt() > 24 * 3600_000L) {
                 JSONObject r = Bridge.call(this, "caps");
                 if (r.has("ch24")) {
                     st.setCaps(r.toString());
@@ -693,20 +696,27 @@ public class PanelActivity extends Activity {
         AlertDialog[] dlg = new AlertDialog[1];
         for (String mac : macs) {
             String nick = st.nickname(mac), host = st.host(mac);
-            String name = nick != null ? nick : host != null ? host : mac;
+            boolean unnamed = nick == null && host == null;
+            String name = nick != null ? nick : host != null ? host : getString(R.string.unknown_device);
             String since = trusted ? sinceText(st.trustedSince(mac), R.string.since_trusted)
                     : sinceText(st.blockedSince(mac), R.string.since_blocked);
             LinearLayout row = Ui.row(this);
             row.setPadding(0, Ui.dp(this, 8), 0, Ui.dp(this, 8));
             LinearLayout info = Ui.column(this);
             info.addView(Ui.text(this, name, 16, "on_surface", true));
-            String detail = (name.equals(mac) ? "" : mac) + (since.isEmpty() || name.equals(mac) ? "" : " · ") + since;
+            String detail = mac + (since.isEmpty() ? "" : " · " + since);
             if (!detail.isEmpty()) {
                 TextView d = Ui.text(this, detail, 13, "on_surface_variant", false);
                 d.setPadding(0, Ui.dp(this, 2), 0, 0);
                 info.addView(d);
             }
             row.addView(info, Ui.weighted(1));
+            // Dokununca ad ver (ozellikle rastgele MAC kullanan, adi bilinmeyen cihazlar icin)
+            row.setClickable(true);
+            row.setOnClickListener(v -> {
+                dlg[0].dismiss();
+                renameDialog(mac, host, () -> showDeviceList(trusted));
+            });
             TextView action = Ui.tonalButton(this, getString(trusted ? R.string.untrust : R.string.unblock));
             action.setOnClickListener(v -> {
                 dlg[0].dismiss();
@@ -793,6 +803,10 @@ public class PanelActivity extends Activity {
 
     /** Cihaza ad ver / guvenilir yap. */
     private void renameDialog(String mac, String host) {
+        renameDialog(mac, host, null);
+    }
+
+    private void renameDialog(String mac, String host, Runnable after) {
         Store st = Store.get(this);
         String nick = st.nickname(mac);
         EditText input = new EditText(this);
@@ -812,11 +826,13 @@ public class PanelActivity extends Activity {
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
                     st.setNickname(mac, input.getText().toString().trim());
                     render();
+                    if (after != null) after.run();
                 })
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, (d, w) -> { if (after != null) after.run(); })
                 .setNeutralButton(st.isTrusted(mac) ? R.string.untrust : R.string.trust, (d, w) -> {
                     st.setTrusted(mac, !st.isTrusted(mac));
                     render();
+                    if (after != null) after.run();
                 })
                 .show();
     }

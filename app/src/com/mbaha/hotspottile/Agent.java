@@ -486,6 +486,9 @@ public final class Agent {
         out.put("be", (Boolean) inv(c, "isIeee80211beEnabled"));
         out.put("macRand", (Integer) inv(c, "getMacRandomizationSetting"));
         out.put("daemon", daemonAlive());
+        try {
+            out.put("country", String.valueOf(inv(wm, "getCountryCode", PKG, null)));
+        } catch (Throwable ignored) { }
         JSONArray al = new JSONArray();
         for (MacAddress m : allowed(c)) al.put(m.toString());
         out.put("allowed", al);
