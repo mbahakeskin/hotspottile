@@ -218,23 +218,30 @@ public final class Agent {
      */
     static void caps(JSONObject out) throws Exception {
         Process p = new ProcessBuilder("dumpsys", "wifi").redirectErrorStream(true).start();
+        String any = null, current = null;
         try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
             String line;
             while ((line = r.readLine()) != null) {
-                int i = line.indexOf("SupportedChannelListIn24g");
-                if (i < 0) continue;
-                out.put("ch24", chList(line, "SupportedChannelListIn24g"));
-                out.put("ch5", chList(line, "SupportedChannelListIn5g"));
-                out.put("ch6", chList(line, "SupportedChannelListIn6g"));
-                java.util.regex.Matcher m = java.util.regex.Pattern.compile("MaximumSupportedClientNumber=(\\d+)").matcher(line);
-                if (m.find()) out.put("maxSupported", Integer.parseInt(m.group(1)));
-                m = java.util.regex.Pattern.compile("mCountryCodeFromDriver(\\w\\w)").matcher(line);
-                if (m.find()) out.put("country", m.group(1));
-                break;
+                if (!line.contains("SupportedChannelListIn24g")) continue;
+                any = line;                                        // en son kayit
+                if (line.contains("mCurrentSoftApCapability")) current = line;   // GUNCEL yetenek satiri
             }
         } finally {
             p.destroy();
         }
+        // Gunluk gecmisindeki eski kayitlar yaniltabilir: varsa guncel satiri, yoksa en son kaydi kullan.
+        String line = current != null ? current : any;
+        if (line == null) return;
+        // Hotspot kapaliyken en son kayit bos listeler tasir: bu "6 GHz yok" degil "bilinmiyor" demektir, bilgi dondurme.
+        if (current == null && chList(line, "SupportedChannelListIn24g").length() == 0) return;
+        out.put("ch24", chList(line, "SupportedChannelListIn24g"));
+        out.put("ch5", chList(line, "SupportedChannelListIn5g"));
+        out.put("ch6", chList(line, "SupportedChannelListIn6g"));
+        out.put("capsCurrent", current != null);
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("MaximumSupportedClientNumber=(\\d+)").matcher(line);
+        if (m.find()) out.put("maxSupported", Integer.parseInt(m.group(1)));
+        m = java.util.regex.Pattern.compile("mCountryCodeFromDriver(\\w\\w)").matcher(line);
+        if (m.find()) out.put("country", m.group(1));
     }
 
     private static JSONArray chList(String line, String key) {

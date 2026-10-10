@@ -17,7 +17,7 @@ bant ve kanal, cihaz sınırı, Wi-Fi 6/7, MAC gizliliği · bağlı cihazları 
 1. Telefonda **Geliştirici seçenekleri → USB hata ayıklama**'yı açın, USB ile bilgisayara bağlayın ve bilgisayara izin verin.
 2. Bilgisayarda (`adb` yüklü olmalı):
    ```bash
-   adb install -g hotspottile-0.1.1.apk
+   adb install -g hotspottile-0.1.2.apk
    adb shell pm grant com.mbaha.hotspottile android.permission.WRITE_SECURE_SETTINGS
    adb tcpip 5555
    adb shell am start -n com.mbaha.hotspottile/.PanelActivity
@@ -39,7 +39,7 @@ bant ve kanal, cihaz sınırı, Wi-Fi 6/7, MAC gizliliği · bağlı cihazları 
 ## Kendiniz derleyin
 Gereksinimler (Mac): Android SDK (`~/Library/Android/sdk`) içinde **build-tools 36.1.0** ve **platforms/android-36**, JDK 11+, `adb`.
 ```bash
-./build.sh                  # -> build/app.apk   (VERSION_NAME=0.1.2 VERSION_CODE=3 ./build.sh ile sürüm verilebilir)
+./build.sh                  # -> build/app.apk   (VERSION_NAME=0.1.3 VERSION_CODE=4 ./build.sh ile sürüm verilebilir)
 ./build.sh install          # derle + kur + WRITE_SECURE_SETTINGS izni (telefon USB'de, hata ayıklama açık)
 adb tcpip 5555              # bir kez; sonrası otomatik (yukarıya bakın)
 ```

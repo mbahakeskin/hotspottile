@@ -13,7 +13,7 @@ Download `hotspottile-<version>.apk` from the [Releases](../../releases) page. T
 1. On the phone, turn on Developer options and USB debugging, connect it by USB, and accept the computer's prompt.
 2. On the computer, with `adb` installed:
    ```bash
-   adb install -g hotspottile-0.1.1.apk
+   adb install -g hotspottile-0.1.2.apk
    adb shell pm grant com.mbaha.hotspottile android.permission.WRITE_SECURE_SETTINGS
    adb tcpip 5555
    adb shell am start -n com.mbaha.hotspottile/.PanelActivity
@@ -44,7 +44,7 @@ You need a Mac with the Android SDK in `~/Library/Android/sdk` (build-tools 36.1
 adb tcpip 5555        # once; later reboots are handled automatically
 ```
 
-There is no Gradle. Set `VERSION_NAME` and `VERSION_CODE` to version a build, for example `VERSION_NAME=0.1.2 VERSION_CODE=3 ./build.sh`. If `keystore/local.jks` doesn't exist, the script creates one. It is not committed, so keep your own copy if you plan to publish updates. `DEBUG_MODE=1 ./build.sh` produces a debuggable build for `run-as`.
+There is no Gradle. Set `VERSION_NAME` and `VERSION_CODE` to version a build, for example `VERSION_NAME=0.1.3 VERSION_CODE=4 ./build.sh`. If `keystore/local.jks` doesn't exist, the script creates one. It is not committed, so keep your own copy if you plan to publish updates. `DEBUG_MODE=1 ./build.sh` produces a debuggable build for `run-as`.
 
 ## Notes
 
