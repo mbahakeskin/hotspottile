@@ -30,7 +30,7 @@ echo "== baglantila (R.java + temel apk) =="
   -o "$OUT/base.apk" \
   --java "$OUT/gen" \
   --min-sdk-version 33 --target-sdk-version 36 ${DEBUG_MODE:+--debug-mode} \
-  --version-code "${VERSION_CODE:-1}" --version-name "${VERSION_NAME:-0.1.0}" \
+  --version-code "${VERSION_CODE:-2}" --version-name "${VERSION_NAME:-0.1.1}" \
   "$OUT"/res-compiled/*.flat
 
 echo "== java derle =="

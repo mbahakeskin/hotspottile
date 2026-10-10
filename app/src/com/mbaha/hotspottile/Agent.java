@@ -102,6 +102,9 @@ public final class Agent {
             out.put("ok", true);
         } catch (Throwable t) {
             Throwable c = t instanceof InvocationTargetException && t.getCause() != null ? t.getCause() : t;
+            // Hatalar panelde yalniz kisa bir toast olarak gorunur; ayrintisi icin logcat'e de yaz:
+            //   adb logcat -s HotspotAgent
+            android.util.Log.w("HotspotAgent", "komut basarisiz: " + String.join(" ", a).replaceAll("pass=[^ ]*", "pass=<gizli>"), c);
             try {
                 out.put("ok", false);
                 if (c instanceof AgentError) out.put("errorKey", ((AgentError) c).key);

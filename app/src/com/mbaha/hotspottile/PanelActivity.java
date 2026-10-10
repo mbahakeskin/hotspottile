@@ -11,6 +11,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.os.SystemClock;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -52,6 +53,7 @@ import java.util.function.Consumer;
  * cihaz adi/guven ayarlari yeniden baslatma gerektirmez, aninda gecerlidir.
  */
 public class PanelActivity extends Activity {
+    private static final String TAG = "HotspotPanel";
     private static final long POLL_MS = 4000;
     private static final int[] LIMITS = {0, 1, 2, 3, 4, 5, 6, 8, 10, 16, 32};
     private static final int[] IDLE_MIN = {0, 5, 10, 15, 30, 60};
@@ -324,6 +326,7 @@ public class PanelActivity extends Activity {
                 JSONObject r = Bridge.call(this, args);
                 main.post(() -> {
                     if (!r.optBoolean("ok", false)) {
+                        Log.w(TAG, "komut basarisiz: " + args[0] + " -> " + r.optString("error"));
                         Toast.makeText(this, errorText(r), Toast.LENGTH_LONG).show();
                     }
                     if (r.optBoolean("ok", false) && args.length > 1) {
@@ -338,6 +341,7 @@ public class PanelActivity extends Activity {
                     render();
                 });
             } catch (Exception e) {
+                Log.w(TAG, "komut istisna: " + args[0], e);
                 main.post(() -> {
                     Toast.makeText(this, describe(e), Toast.LENGTH_LONG).show();
                     if (state != null) render(); // anahtar gorunumunu gercek duruma geri al
@@ -392,6 +396,7 @@ public class PanelActivity extends Activity {
             try {
                 JSONObject set = Bridge.call(this, args.toArray(new String[0]));
                 if (!set.optBoolean("ok", false)) {
+                    Log.w(TAG, "uygula basarisiz: " + set.optString("error"));
                     main.post(() -> {
                         setApplyBusy(false);
                         Toast.makeText(this, errorText(set), Toast.LENGTH_LONG).show();
@@ -402,6 +407,7 @@ public class PanelActivity extends Activity {
                 JSONObject s = Bridge.call(this, "state");
                 main.post(() -> { setApplyBusy(false); setState(s); clearPending(); render(); });
             } catch (Exception e) {
+                Log.w(TAG, "uygula istisna", e);
                 main.post(() -> { setApplyBusy(false); Toast.makeText(this, describe(e), Toast.LENGTH_LONG).show(); });
             }
         });
