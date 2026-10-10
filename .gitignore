@@ -1,0 +1,7 @@
+build/
+*.apk
+.DS_Store
+# Imza anahtari repoya girmez: build.sh yoksa kendisi uretir.
+keystore/
+# Gelistirme sirasinda kullanilan tek seferlik deneyler urunun parcasi degil
+experiments/

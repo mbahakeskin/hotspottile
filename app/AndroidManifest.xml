@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mbaha.hotspottile">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- Wi-Fi olaylarini (PendingIntent ile) dinlemek ve Wi-Fi durumunu okumak -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- Yeni cihaz bildirimleri -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Launcher aktivitesi YOK: uygulama cekmecede gorunmez, sadece QS tile olarak eklenir. -->
+    <application
+        android:label="@string/app_name"
+        android:allowBackup="false"
+        android:theme="@style/Panel">
+
+        <!-- Kisa dokunus: hotspot'u ac/kapat. Uzun basis: PanelActivity (QS_TILE_PREFERENCES). -->
+        <service
+            android:name=".HotspotTileService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:icon="@drawable/ic_hotspot"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".PanelActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Panel">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ShareActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Panel" />
+
+        <service
+            android:name=".HealJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver android:name=".NetReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".ActionReceiver" android:exported="false" />
+
+        <!-- Telefondaki Agent daemon'u "am broadcast" ile tetikler (shell'in cagirabilmesi icin exported); her olay gizli anahtar tasir. -->
+        <receiver android:name=".EventReceiver" android:exported="true" />
+    </application>
+</manifest>
